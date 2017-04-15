@@ -1,0 +1,155 @@
+STDWIN ESSENTIAL INFORMATION
+****************************
+
+[last edit: 9 February 1995]
+
+
+This is Version 1.0
+===================
+
+It corrects a few small problems since the release of 0.9.9 only.
+
+For a history of changes per release, see the file ANNOUNCE.
+
+
+Getting Started
+===============
+
+Execute the following two commands:
+
+	./configure
+	make
+
+This should build two versions of the library in Ports/alfa and
+Ports/x11, and two test applications in Appls/klok and Appls/miniedit.
+
+To try out the graphical capabilities on an X display, run
+Appls/klok/klok and Appls/miniedit/miniedit.
+
+To try out the text capabilities on a termcap-capable terminal, run
+Appls/miniedit/miniedit.alfa.
+
+To build for multiple platforms, presuming your Make program supports
+VPATH, do the following on each platform:
+
+	mkdir <platform>	# e.g. mkdir sunos4
+	cd <platform>
+	../configure
+	make			# on IRIX, use smake (this uses VPATH)
+
+To build on the Mac, email me for instructions.
+
+
+What Is STDWIN
+==============
+
+STDWIN (STanDard Window INterface -- similar to STDIO) is a simple
+windowing interface for C programs, that is implemented on various
+platforms.  The "flagship" implementations support the Macintosh and
+X11 windowing environments.  The emphasis is on portability between
+platforms and a simple interface to the application, not on getting
+the maximum performance or functionality of one particular platform.
+
+For a longer introduction, read the (still outdated) file Doc/ABOUT.
+For more information on the Macintosh version, read Ports/mac/README.
+For MS-DOS, read Ports/msdos/README.
+
+
+Supported Platforms
+===================
+
+Currently, programs using STDWIN can be made to run on Unix under X11,
+on alphanumeric terminals (using termcap -- obviously with some loss
+of functionality), on the Apple Macintosh, or on MS-DOS with a dumb
+display.  Someone contributed a port to Windows but it is too
+incomplete to release.  If you're interested in fixing it up, please
+contact me -- the world will be grateful to you!
+
+
+Copyright
+=========
+
+Copyright 1988-1995 by Stichting Mathematisch Centrum, Amsterdam, The
+Netherlands.
+
+                        All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation, and that the names of Stichting Mathematisch
+Centrum or CWI not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior permission.
+
+STICHTING MATHEMATISCH CENTRUM DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL STICHTING MATHEMATISCH CENTRUM BE LIABLE
+FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+
+Where To Get STDWIN
+===================
+
+I have placed a copy of the tar image named stdwin1.0.tar.gz on the
+ftp server ftp.cwi.nl in directory pub/stdwin.
+
+Don't forget to specify binary file transfer mode when transferring
+compressed or tar files!  ("type binary")
+
+
+The STDWIN source tree
+======================
+
+The STDWIN tree is organized as follows.  Starting from the top of the
+tree (where this README file lives), we have:
+
+	.		Top-level directory.
+
+	README		The file you are now reading.
+
+	H/		Public header files of STDWIN ports and
+			packages.  Stdwin applications should pass this
+			directory to the compiler in a "-I" option.
+
+	Tools/		Subroutines used by various ports and
+			applications; not STDWIN-specific.
+			(This has now been truncated to the bare
+			minimum.)
+
+	Gen/		(Almost) generic versions of some STDWIN
+			functions, used by more than one port.  (Some
+			are dummies that ignore the request or always
+			fail.)
+
+	Ports/		Source for various ports.
+			Note: not all subdirectories are distributed!
+
+	Ports/x11/	Port to X11 R4; uses Xlib only.
+	Ports/alfa/	Port for alphanumeric displays using termcap/terminfo.
+	Ports/vtrm/	VTRM (virtual terminal) package used by Ports/alfa.
+	Ports/mac/	Apple Macintosh port (both MPW and THINK C).
+
+	Packs/		Source for packages (libraries) on top of STDWIN.
+
+	Packs/textedit/	Standard text-editing package.
+
+	Appls/		Source for test programs and real applications.
+
+	Appls/README	Read this for more information.
+
+	Doc/		Documentation for STDWIN and packages.
+			Unfortunately this is terribly out of date.
+
+	Doc/ABOUT	Blurb to be sent to prospective users.
+	Doc/paper.ms	The original paper (CWI report CS-R8817) (*troff -ms).
+
+
+--Guido van Rossum, CWI, Amsterdam <mailto:Guido.van.Rossum@cwi.nl>
+<http://www.cwi.nl/cwi/people/Guido.van.Rossum.html>
+
+"Too much of a good thing always leaves one wanting less, I always
+find."  --Basil Fawlty

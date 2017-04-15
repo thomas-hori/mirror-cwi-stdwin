@@ -1,0 +1,70 @@
+.TH GLOB 3 "June 28, 1986"
+.AT 3
+.SH NAME
+glob \- expand meta-characters in file names
+.SH SYNOPSIS
+.nf
+.B "int glob(pattern, buffer, size)
+.B "char *pattern;
+.B "char *buffer;
+.B "unsigned int size;
+.fi
+.SH DESCRIPTION
+.I Glob
+expands the meta-characters *, ? and [...] in
+.I pattern
+and copies the file name(s) that match the pattern to 
+.I buffer ,
+whose length is given by
+.I size .
+.PP
+Before expansion is attempted, the pattern is processed as follows:
+an initial
+.I ~user
+is replaced by
+.I user's
+home directory, an initial ~ is replaced by the contents of $HOME,
+and an initial
+.I $variable
+is replaced by the contents of the environment variable by that name.
+The universal quoting character \e can be prefixed to *, ? and [, to
+initial ~ or $, and to itself to prevent the special meaning.
+.PP
+The expansion algorithm used is believed to give exactly the same
+results as the expansion of meta-characters by the Bourne shell
+.I sh (1),
+except for the different quoting mechanism and the expansion of ~ and $.
+The files are sorted.
+.SH RETURN VALUE
+.I Glob
+returns the number of files matching the pattern that could be
+transferred to the buffer.
+If no files match, the return value is 0 but the pattern is copied to
+the buffer after expansion of ~, $ and \e-quotes.
+.SH SEE ALSO
+sh(1)
+.SH AUTHOR
+Guido van Rossum, CWI, Amsterdam <guido@mcvax.uucp>
+.SH DIAGNOSTICS
+There are no explicit diagnostics.
+If there is not enough memory to hold the internal lists of
+partially-matching files, not all matching files may be found.
+If the buffer has not enough space to hold all matching files, as many
+as will fit are transferred to it.
+If
+.I $variable
+has no value, the empty string is substituted.
+If no expansion can be found for ~ or
+.I ~user ,
+it is left in the pattern unchanged.
+If 
+.SH BUGS
+There should be an interface to the ``raw'' globbing algorithm, which
+can return an arbitrary number of files in a ``malloced'' structure and
+does not do ~ or $ expansion or \e-quoting.
+.PP
+The code uses the Berkeley directory-reading package, so in order to
+port it to v7 or sys5 you'll need to get hold of a public domain
+re-implementation of that package.
+.PP
+The name is a relict from ancient times.

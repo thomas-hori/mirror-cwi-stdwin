@@ -1,0 +1,57 @@
+#
+# Makefile for miniedit application
+#
+APP=		klok
+
+# Substitutions by configure
+srcdir=		@srcdir@
+VPATH=		@srcdir@
+INSTALL=	@INSTALL@
+
+CC=		@CC@
+RANLIB=		@RANLIB@
+AR=		@AR@
+
+DEFS=		@DEFS@
+LIBS=		@LIBS@
+OPT=		@OPT@
+X_LIBS=		@X_LIBS@
+X_EXTRA_LIBS=	@X_EXTRA_LIBS@
+
+# Install prefixes, may be changed by configure
+prefix=		/usr/local
+exec_prefix=	$(prefix)
+
+# Programs
+SHELL=		/bin/sh
+
+# Pointers to other directories
+topdir=		$(srcdir)/../..
+H=		$(topdir)/H
+
+CFLAGS=		$(OPT) -I$(H) $(DEFS)
+
+OBJS=		$(APP).o bsdsetdate.o
+
+XLIBS=		../../Packs/textedit/libtextedit.a ../../Ports/x11/libstdwin.a
+ALFALIBS=	../../Packs/textedit/libtextedit.a ../../Ports/alfa/libstdwin.a
+TERMLIB=	-ltermcap
+
+all:		$(APP)
+
+$(APP):		$(OBJS) $(XLIBS)
+		$(CC) $(OPT) $(OBJS) $(XLIBS) $(LIBS) \
+			$(X_LIBS) -lX11 $(X_EXTRA_LIBS) -lm -o $(APP)
+
+$(APP).alfa:	$(OBJS) $(ALFALIBS)
+		$(CC) $(OPT) $(OBJS) \
+			$(ALFALIBS) $(LIBS) $(TERMLIB) -o $(APP).alfa
+
+$(APP).o:	$(APP).c
+bsdsetdate.o:	bsdsetdate.c
+
+clean::
+		-rm -f *.o core *~ [,@#]* .[,@#]*
+
+clobber::	clean
+		-rm -f $(APP) tags TAGS

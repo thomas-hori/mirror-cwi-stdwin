@@ -1,0 +1,13 @@
+Unfortunately the documentation for STDWIN is in a sorry state.
+There is nothing here that even remotely resembles a user manual;
+"paper.ms" comes closest to a full description.
+
+WHATSNEW	summary of changes in version 0.9.6 since 0.9.5
+ABOUT		the old STDWIN blurb that I used to mail out
+paper.ms	the original STDWIN report
+seldoc.ms	describes using X11 Selections and Cut Buffers in STDWIN
+macros.ms	macrose used by seldoc.ms
+vtrmdoc.ms	describes the VTRM package used by ../Ports/alfa
+man/		manpages for dpv, packages and X11 stdwin
+
+--Guido

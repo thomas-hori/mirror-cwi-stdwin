@@ -1,0 +1,242 @@
+.TH VT 3
+.SH NAME
+VT \- virtual terminal package for STDWIN
+.SH SYNOPSIS
+.nf
+.ft C
+#include "stdwin.h"
+#include "vt.h"
+
+VT *vtopen(char *title, int rows, int cols, int saverows);
+void vtclose(VT *vt);
+void vtansiputs(VT *vt, char *text, int len);
+void vtsetcursor(VT *vt, int row, int col);
+void vtreset(VT *vt);
+bool vtresize(VT *vt, int rows, int cols, int saverows);
+bool vtautosize(VT *vt);
+VT *vtfind(WINDOW *win);
+void vtsend(VT *vt, char *text, int buf);
+.ft 1
+
+/* The following functions are actually macros */
+.ft C
+WINDOW *vtwindow(VT *vt);
+int vtcwidth(VT *vt);
+int vtcheight(VT *vt);
+void vtsetnlcr(VT *vt, bool nlcr);
+void vtsetlazy(VT *vt, bool lazy);
+.ft 1
+.fi
+.SH DESCRIPTION
+.I VT
+is a package which emulates one or more virtual terminals in STDWIN
+windows.
+A VT structure contains a WINDOW pointer and data structures to save the
+screen contents, cursor position, etc.
+Such a virtual terminal may be used to implement a terminal emulation
+program on a micro-computer (which was the original goal of this
+programming exercise), or as a tool to simplify interfacing a program
+using printf-style output to STDWIN.
+The virtual terminal's cursor position is indicated by STDWIN's standard
+text caret, appearing to the left of the character at the cursor
+position.
+This actually feels very natural in most cases.
+.PP
+The functions you might want to know about are:
+.IP vtopen
+Creates the window and returns a pointer to a VT struct.
+.I Rows
+and
+.I cols
+specify the size of the virtual terminal;
+.I saverows
+specifies the number of rows saved after they have scrolled off the top
+of the terminal.
+If something went wrong, a nil pointer is returned.
+.IP vtclose
+Closes the window and deallocates the data contained in the VT struct.
+.IP vtansiputs
+Sends an output string to the virtual terminal.
+.I Len
+specifies the length of the string; if it is negative, the string is
+terminated by a null character.
+Control character and escape sequence processing is done in the style of
+ANSI terminals, with some limitations and extensions.
+Warning: unless
+.I "vtsetnlcr(vt, 1)"
+has been called, both a CR and LF character must be sent to properly
+start a new line.
+.IP vtsetcursor
+Moves the terminal's cursor to the indicated position.
+The top left corner of the virtual terminal is position (0, 0).
+.IP vtreset
+Completely resets the virtual terminal to its initial state.
+The cursor is moved to position (0, 0).
+The
+.I lazy
+and
+.I nlcr
+flags are not changed.
+.IP vtresize
+Changes the dimensions of the virtual terminal to explicitly given
+numbers.
+In case of memory shortage, this function may fail irrecoverably,
+leaving the VT struct in an unusable state (except to
+.IR vtclose ).
+.IP vtautosize
+Changes the dimensions of the virtual terminal to conform to the new
+window size.
+If possible, the sum of rows and saverows is kept constant.
+The same limitations as for
+.I vtresize
+apply.
+.IP vtfind
+Given a window pointer, returns a pointer to the VT struct containing
+that window.
+Returns a nil pointer if no such VT struct exists.
+.IP vtsend
+This function is defined in the library, but you might want to write
+your own version.
+It is called by the library for cases where the virtual terminal must
+send a reply back to the computer system.
+(This happens in response to certain ANSI escape sequences, in
+particular ESC-[-6-n or ESC-[-c.)
+You may want to ignore this output, or actually send it down a serial
+line if you are implementing a terminal emulator program for a
+micro-computer.
+The library's default version calls
+.I vtansiputs
+with the same parameters as passed to
+.I vtsend.
+.IP vtwindow
+Returns a pointer to the window contained in the VT struct.
+.IP vtcwidth
+Returns the width of characters drawn in the VT's window.
+.IP vtcheight
+Returns the height of characters drawn in the VT's window.
+.IP vtsetnlcr
+Turns the
+.I nlcr
+option on or off.
+When on, every LF character received is translated into a CR plus LF.
+This is useful if you want to perform C style output to a VT window,
+where lines are terminated by a single LF.
+Initially this option is off.
+.IP vtsetlazy
+Turns the
+.I lazy
+option on or off.
+When on, actual output to the terminal is delayed until the window's
+draw procedure is called; when off, all output is drawn immediately.
+Initially this option is off.
+.SH ANSI ESCAPE SEQUENCES
+The termcap entries for xterm, vt100, vt100em and versaterm would all
+work with the emulated terminal (if you could somehow translate the
+output intended for a Unix terminal into calls to
+.IR vtansiputs ).
+Unrecognized escape sequences and control characters are ignored.
+.PP
+*** List all implemented escape sequences here. ***
+.SH EXAMPLE
+.nf
+.ft C
+#include "stdwin.h"
+#include "vt.h"
+
+main() {
+	VT *vt;
+	winit();
+	wsetdefwinsize(80*wcharwidth('0'), 24*wlineheight());
+	vt= vtopen("VT", 24, 80, 100); /* Should check outcome */
+	vtautosize(vt);
+	vtsetnlcr(vt, 1); /* Map LF to CR LF */
+	vtansiputs(vt, "Hello, world\en", -1);
+	eventloop();
+	wdone();
+	exit(0);
+}
+
+eventloop(vt) VT *vt; {
+	for (;;) {
+		EVENT e;
+		wgetevent(&e);
+		switch (e.type) {
+		case WE_SIZE:
+			vtautosize(vt); /* Should check outcome */
+			break;
+		case WE_CHAR:
+			{ char buf[2];
+			  buf[0]= e.u.character;
+			  vtansiputs(vt, buf, 1);
+			  break; }
+		case WE_MOUSE_DOWN:
+			vtsetcursor(vt,
+			            e.u.where.v / vtcheight(vt),
+			            e.u.where.h / vtcwidth(vt));
+			break;
+		case WE_COMMAND:
+			switch (e.u.command) {
+			case WC_CLOSE:                              return;
+			case WC_RETURN: vtansiputs(vt, "\en", 1);    break;
+			case WC_BACKSPACE: vtansiputs(vt, "\eb", 1); break;
+			case WC_TAB: vtansiputs(vt, "\et", 1);       break;
+			}
+			break;
+		}
+	}
+}
+.ft 1
+.fi
+.SH DIAGNOSTICS
+.I Vtopen
+returns a nil pointer if it can't allocate all the required memory or if
+the call to
+.I wopen
+it makes fails.
+.br
+.I Vtresize
+and
+.I vtautosize
+return false (zero) if they can't allocate the extra memory required;
+in this case the VT struct has been damaged beyond repair.
+.SH SEE ALSO
+STDWIN documentation
+.SH AUTHOR
+Guido van Rossum
+.SH BUGS
+In some versions of STDWIN, the scroll bars won't appear and some other
+functionality won't be available unless the program calls
+.I wgetevent.
+.br
+Unless the application calls
+.I vtautosize
+at all the right moments, it is quite possible that the window size
+doesn't match the size of the virtual terminal.
+When the window is too small, STDWIN's automatic scrolling will cause
+the text to jump around; when it is too large, portions of the
+scrolled-away text will remain visible but unreachable by the cursor.
+.br
+The ANSI terminal implementation is incomplete.
+It certainly isn't a full-fledged VT100.
+.br
+The behaviour of the cursor at the right margin is slightly
+unconventional.
+.br
+Bold output only works on the Macintosh, and requires that a font called
+``Bold'' (9 points) be available in the system file.  This font can be
+found in the resources for (some versions of) VersaTerm(TM).
+.br
+The package makes the assumption that all characters have the same
+width.
+.br
+The order of parameters indicating rows and columns is internally
+consistent, but reversed with respect to order used for h and v
+coordinates in the rest of STDWIN.
+.br
+The origin of cursor coordinates passed to
+.I vtsetcursor
+is (0, 0), even though the origin used by ANSI escape sequences is
+(1, 1).
+.br
+The header file defines functions that aren't really part of the public
+interface.

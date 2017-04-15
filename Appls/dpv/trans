@@ -1,0 +1,74 @@
+# Font translation tables for dpv for X11 R3 and R4
+# -------------------------------------------------
+
+# This will work for both -Tpsc and -Thar.
+
+# PostScript font names
+# ---------------------
+
+R	-*-times-medium-r-*--%d-*
+I	-*-times-medium-i-*--%d-*
+B	-*-times-bold-r-*--%d-*
+BI	-*-times-bold-i-*--%d-*
+
+H	-*-helvetica-medium-r-*--%d-*
+HO	-*-helvetica-medium-o-*--%d-*
+HB	-*-helvetica-bold-r-*--%d-*
+HD	-*-helvetica-bold-o-*--%d-*
+
+C	-*-courier-medium-r-*--%d-*	
+CO	-*-courier-medium-o-*--%d-*
+CB	-*-courier-bold-r-*--%d-*
+CD	-*-courier-bold-o-*--%d-*
+
+# CW is a common alias for C
+CW	-*-courier-medium-r-*--%d-*	
+
+# CWI Harris font names (also R, I, B, BI)
+# ----------------------------------------
+
+# Vega light, Vega, Vega medium (Helvetica look-alike)
+Vl	-*-helvetica-medium-r-*--%d-*
+vl	-*-helvetica-medium-o-*--%d-*
+V	-*-helvetica-medium-r-*--%d-*
+v	-*-helvetica-medium-o-*--%d-*
+Vm	-*-helvetica-bold-r-*--%d-*
+vm	-*-helvetica-bold-o-*--%d-*
+
+# Baskerville (see also small caps)
+br	-*-times-medium-r-*--%d-*
+bi	-*-times-medium-i-*--%d-*
+bb	-*-times-bold-r-*--%d-*
+bI	-*-times-bold-i-*--%d-*
+
+# Century Schoolbook
+cr	-*-new?century?schoolbook-medium-r-*--%d-*
+ci	-*-new?century?schoolbook-medium-i-*--%d-*
+cb	-*-new?century?schoolbook-bold-r-*--%d-*
+cI	-*-new?century?schoolbook-bold-i-*--%d-*
+
+# Laurel
+lr	-*-times-medium-r-*--%d-*
+li	-*-times-medium-i-*--%d-*
+lb	-*-times-bold-r-*--%d-*
+lI	-*-times-bold-i-*--%d-*
+
+# Funny fonts mapped to Helvetica, so at least they differ from Times
+G3	-*-helvetica-medium-r-*--%d-*		# German no 3
+fs	-*-helvetica-medium-r-*--%d-*		# French Script
+RS	-*-helvetica-medium-o-*--%d-*		# Rose Script
+SO	-*-helvetica-bold-r-*--%d-*		# Scitype Open
+
+# OCR-B (line printer font, only available in a few sizes)
+lp	-*-courier-bold-r-*--%d-* 8 10 12
+
+# Small caps fonts mapped to normal fonts
+Rs	-*-times-medium-r-*--%d-*		# Times
+Bs	-*-times-bold-r-*--%d-*			# Times bold
+bs	-*-times-medium-r-*--%d-*		# Baskerville
+bS	-*-times-bold-r-*--%d-*			# Baskerville bold
+
+# Font used by funny character translation
+# ----------------------------------------
+
+r3symbol	*-*-symbol-medium-r-*--%d-*

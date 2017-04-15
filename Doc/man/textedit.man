@@ -1,0 +1,235 @@
+.TH TEXTEDIT 3
+.SH NAME
+Textedit \- text-editing package for STDWIN
+.SH SYNOPSIS
+.nf
+.ft C
+#include "stdwin.h"
+
+TEXTEDIT *tealloc(WINDOW *win, int left, int top, int width);
+TEXTEDIT *tecreate(WINDOW *win, int left, int top, int right, int bottom);
+void tefree(TEXTEDIT *tp);
+void tedestroy(TEXTEDIT *tp);
+
+void tedraw(TEXTEDIT *tp);
+void tedrawnew(TEXTEDIT *tp, int left, int top, int right, int bottom);
+void temove(TEXTEDIT *tp, int left, int top, int width);
+void temovenew(TEXTEDIT *tp, int left, int top, int right, int bottom);
+
+void tesetfocus(TEXTEDIT *tp, int foc1, int foc2);
+void tereplace(TEXTEDIT *tp, char *str);
+void tesetbuf(TEXTEDIT *tp, char *buf, int buflen);
+
+void tearrow(TEXTEDIT *tp, int code);
+void tebackspace(TEXTEDIT *tp);
+bool teclicknew(TEXTEDIT *tp, int h, int v, bool extend);
+bool tedoubleclick(TEXTEDIT *tp, int h, int v);
+bool teevent(TEXTEDIT *tp, EVENT *ep);
+
+#define teclick(tp, h, v) teclicknew(tp, h, v, FALSE)
+#define teclickextend(tp, h, v) teclicknew(tp, h, v, TRUE)
+
+char *tegettext(TEXTEDIT *tp);
+int tegetlen(TEXTEDIT *tp);
+int tegetnlines(TEXTEDIT *tp);
+int tegetfoc1(TEXTEDIT *tp);
+int tegetfoc2(TEXTEDIT *tp);
+int tegetleft(TEXTEDIT *tp);
+int tegettop(TEXTEDIT *tp);
+int tegetright(TEXTEDIT *tp);
+int tegetbottom(TEXTEDIT *tp);
+
+int wdrawpar(int h, int v, char *text, int width);
+int wparheight(char *text, int width);
+.ft 1
+.fi
+.SH DESCRIPTION
+.I Textedit
+is the standard text-editing package for STDWIN.
+It allows you to designate any part of a window as a ``text-editing''
+area, in which the user can see or edit arbitrary text.
+Until I find the time and the mental rest to write a decent manual,
+you'll have to do with the example and hints on this man page.
+.PP
+A textedit area need not occupy an entire window, and there can be
+more than one textedit area in a given window.
+Consequently, textedit areas are not resized automatically when their
+window is resized, and the document size is not set automatically when
+the textedit area's size changes.
+If you want to use a single textedit area in a window, and want them to
+be coupled more tightly, use the
+.I editwin
+package instead.
+.PP
+The functions
+.I wdrawpar
+and
+.I wparheight
+draw a paragraph of text exactly like the
+.I textedit
+routines would draw it, without the need to allocate a textedit data
+structure for it.
+.I Wdrawpar
+returns the ``v'' coordinate of the bottom of the paragraph drawn, and
+.I wparheight
+returns its height.
+.PP
+Available routines are:
+.IP tealloc
+.IP tecreate
+.IP tefree
+.IP tedestroy
+.IP tedraw
+.IP tedrawnew
+.IP temove
+.IP temovenew
+.IP tesetfocus
+.IP tereplace
+.IP tesetbuf
+.IP tearrow
+.IP tebackspace
+.IP teclicknew
+.IP tedoubleclick
+.IP teevent
+.IP teclick
+.IP teclickextend
+.IP tegettext
+.IP tegetlen
+.IP tegetnlines
+.IP tegetfoc1
+.IP tegetfoc2
+.IP tegetleft
+.IP tegettop
+.IP tegetright
+.IP tegetbottom
+.IP wdrawpar
+.IP wparheight
+.SH EXAMPLE
+.nf
+.ft C
+#include "stdwin.h"
+
+WINDOW *win;
+TEXTEDIT *tp;
+
+void drawproc(win, left, top, right, bottom) WINDOW *win; {
+	tedrawnew(tp,left, top, right, bottom);
+}
+
+main() {
+	winit();
+	win= wopen("Hello world", &drawproc);
+	tp= tecreate(win, 20, 20, 200, 200);
+	tereplace(tp, "Guido is gek");
+	for (;;) {
+		EVENT e;
+		wgetevent(&e);
+		if (teevent(tp, &e)) continue; /* Event has been handled */
+		if (e.type == WE_COMMAND && e.u.command == WC_CLOSE) break;
+	}
+	wdone();
+	exit(0);
+}
+.ft 1
+.fi
+.SH HINTS
+.I Tedestroy
+calls
+.I wchange
+for the area occupied by the textedit area, and then calls
+.IR tefree ;
+.I tefree
+gets rid of the data structures allocated for it.
+.PP
+.I Tesetbuf
+``gives the buffer away.''
+That is, you should have allocated the buffer using
+.IR malloc (3),
+but you shouldn't call
+.I free
+to get rid of it \- a pointer to the buffer is incorporated in the
+textedit data structures, and it will be freed later by
+.I tefree.
+Don't pass a buffer that wasn't allocated through
+.IR malloc (3)!
+.PP
+.I Tegettext
+returns a pointer to the internal buffer used to represent the text.
+Subsequent calls to textedit routines that modify the buffer may
+invalidate this pointer.
+You shouldn't modify the text found there.
+To get the text selected in the focus, copy the substring found between
+positions
+.I tegetfoc1
+and
+.I tegetfoc2,
+for example:
+.nf
+.ft C
+/* Copy focus text into buffer, whose size is len */
+getfocus(tp, buf, len) TEXTEDIT *tp; char *buf; {
+	int f1= tegetfoc1(tp), f2= tegetfoc2(tp);
+	char *text= tegettext(tp);
+	if (f2-f1 < len) len= f2-f1+1;
+	strncpy(buf, len-1, text+f1);
+	buf[len-1]= '\0';
+}
+.ft 1
+.fi
+.SH DIAGNOSTICS
+.I Tealloc
+and
+.I tecreate
+return NULL when they could not get all the necessary memory.
+The other routines may fail but there is no way to find out.
+.SH SEE ALSO
+STDWIN documentation
+.br
+editwin(3)
+.SH AUTHOR
+Guido van Rossum
+.SH BUGS
+Textedit areas always grow and shrunk automaticatically at the bottom.
+Therefore,
+.I tecreate
+ignores the bottom coordinate.
+.br
+When a textedit area shrinks more than a line at a time, garbage may
+remain on the screen between the old and the new bottom position.
+.br
+The text attributes (font, size and style) in effect when any of the
+textedit routines are called must be those that were in effect when the
+textedit area was created.  (The routines should save and restore the
+text attributes, but currently they don't.)
+.br
+The constants TRUE and FALSE used in the #include file are not defined
+there, even though the typedef bool is.
+.br
+Beware that the last argument to
+.I tealloc
+and
+.I temove
+is the width of the textedit area on the screen, not its right
+coordinate!
+.br
+It is a pain that there are ``new'' and ``old'' versions of routines
+like tealloc, tedraw, temove and teclick.
+The old routines should not be used any more, and the new ones should be
+renamed to the old names.
+.br
+.I Wdrawpar
+and
+.I wparheight
+are easy to use but not particularly efficient; they allocate a textedit
+data structure, call internal textedit routines to do the work, and then
+deallocate the data structure again.
+.br
+Missing functionality:
+a way to affect the line breaking algorithm;
+a way to display text centered or with justified margins;
+a way to disable changes while still passing events (for selection, etc.);
+more keyboard editing functions (begin/end of line/file, etc.);
+a way to suppress the automatic growing of the textedit area;
+a way to specify a margin around the textedit area where mouse clicks
+are still accepted by
+.I teevent.

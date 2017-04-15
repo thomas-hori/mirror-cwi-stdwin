@@ -1,0 +1,213 @@
+.\" Optional .TH arguments: $3 is bottom center, $4 bottom left, $5 top center
+.TH UBR 1 "18 June 1987" "CWI"
+.SH NAME
+ubr \- Universal BRowser
+.SH SYNOPSIS
+.B ubr
+[ directory ] ...
+.SH DESCRIPTION
+.I Ubr
+is a modern version of the old
+.I dired
+program, posted to USENET several times in the past.
+(Ubr does not contain any code from dired.)
+.PP
+Command input to Ubr usually consists of one- or two-character escape
+sequences, such as
+.B ESC-o
+or
+.B ^X-n.
+Arrow keys also have a meaning.
+Commands can also be selected from a group of
+.I menus,
+activated by pressing
+.B ESC-ESC,
+through which one can navigate using the arrow keys (also the Emacs
+equivalents
+.B ^F, ^B, ^P
+and
+.BR ^N ).
+Press Return to select a command; press
+.B ^C
+or
+.B ESC-ESC
+(again) to cancel menu selection mode.
+All menu items have shortcuts which are displayed next to the menu
+items; this description only mentions the shortcuts because these are
+what you'll normally use.
+.PP
+.I Ubr
+displays one or more directory listings (very much like the output of
+.IR ls (1)),
+each in its own
+.I window.
+A window is really just a segment of the screen; a window has a title
+line, showing the name of the directory displayed in the window,
+centered in dashes.
+At any moment there is a current window, whose title line is shown in
+inverse video.
+The directory displayed in the current window is used as the initial
+working directory, also known as current directory, for all shell
+commands issued; the term
+.I current directory
+therefore can be used without confusion.
+There are a number of commands that merely affect which window is
+current:
+.B ^X-n
+makes the next window on the screen the current window,
+.B ^X-p
+makes the previous window current,
+.B ^X-d
+or
+.B ESC-k
+closes (deletes) the current window.
+when all windows are closed,
+.I ubr
+quits;
+.B ESC-q
+or
+.B ^C
+can be used to quit immediately.
+.PP
+In each directory window, there is a
+.I selection
+which may be any subset (including the empty set) of the files displayed
+in the window.
+The names of selected files are displayed in inverse video.
+The following commands affect what files are selected in the current
+window:
+.B up-arrow
+(also
+.BR ^P )
+and
+.B down-arrow
+(also
+.BR ^N )
+move the selection one line up or down, if possible.
+.B ESC-a
+selects all files in the window.
+.B ESC-s
+prompts for a file name pattern like the ones used by
+.IR sh (1)
+and selects all file names in the current window matching that pattern.
+.B ^G
+or
+.B ESC-^G
+only works on HP 2621 terminals (and even then only if you use a
+beefed-up
+.I termcap
+file).
+It selects the file currently at the cursor (which is movable by using
+the arrow keys without pressing the shift key at the same time).
+On a BLIT, using Sape's tty driver (or mine), you may be able to use
+mouse clicks to select files.
+.PP
+Besides the selection, which is rather volatile, there is a more
+permanent
+.I marking
+of files, indicated by a `!' before the file name.
+These marks can be set or cleared by selecting a file and pressing
+.B ESC-f
+(flip marks).
+If more than one file is selected, the effect of
+.B ESC-f
+depends on the mark of the first selected file: if set, all marks of
+selected files are cleared, if clear, all marks are set.
+The marks are used for deleting, moving and copying files.
+.PP
+.B ESC-o
+attempts to open all selected files as subdirectories.
+If a non-directory is selected, an error message is issued.
+.B ESC-O
+(type ESC-shift-letter Oh)
+prompts for a pathname of a directory and displays its contents in a
+window.
+.PP
+.B ESC-/
+(re-read directory contents) is a command which is sometimes necessary
+after a background job or another user has changed a directory's
+contents.
+It reads the directory's contents and conpares it with the window
+contents; files that have been deleted are deleted from the window, new
+files are added (and selected!), and the status information for other
+files is updated if it has changed.
+.PP
+The commands
+.B ESC-m,
+.B ESC-l
+and
+.B ESC-c
+can move, link and copy files between directories.
+They take all marked files in other windows and respectively move, link
+or copy them to the current directory, where they are made the curernt
+selection.
+.B ESC-d
+deletes all marked files from the current directory.
+Note that to delete a file, three actions are necessary: select it, mark
+it and press ESC-d, so you have a reasonable protection against
+mistakes.
+(Also, files are never really deleted but just given a new name that
+begins with a `,'; such files are removed automatically after a few
+days, and are not seen by
+.IR ubr .)
+.B ESC-r
+requires that a single file is selected; it prompts for a new name and
+the file is given that new name (if there are no conflicts).
+.B ESC-n
+prompts for a name and creates a new, empty subdirectory with that name.
+The new subdirectory is selected but not opened.
+.PP
+.B ESC-;
+prompts for a shell command and executes the command in the current
+directory, with the files currently selected (if any) as parameters.
+.B ESC-!
+prompts for a shell commands and executes it in the current directory;
+it does not explicitly pass it the selected files, but the shell
+variables $1, $2, ... (together referred as $* or ``$@'') contain the
+selected files names.
+.B ESC-$
+starts an interactive subshell in the current directory.
+.B ESC-e
+edits the selected files using the editor set in the environment
+variable $EDITOR (default
+.IR vi ).
+.B ESC-p
+pages the selected files using the pager set in the environment variable
+$PAGER (default
+.IR more ).
+.SH FILES
+.B ~guido/bin/ubr
+the program.
+.br
+.B .
+current directory, opened if no arguments.
+.br
+.B /etc/termcap
+default
+.I termcap
+file; if you want special effects on HP 2621 terminals, you should use
+.B ~guido/lib/termcap
+instead (put this pathname in the
+.I TERMCAP
+variable).
+.SH SEE ALSO
+ls(1), sh(1)
+.SH DIAGNOSTICS
+Intended to be self-explanatory.
+.SH BUGS
+Sometimes the display gets messed up or updated incompletely.
+Use control-L to fix this.
+.br
+Files whose name begins with a comma are not listed.
+.br
+There should be a way to edit or at least page files in a window, rather
+than relying completely on ESC-e and ESC-p.
+.br
+Attempts to open a file should result in paging it instead of refusal.
+.br
+.I Ubr
+is still a very rough version of the program I had in mind.
+Please report any problems you have, and any features you would like to
+see in a program like this, to the author.
+.SH AUTHOR
+Guido van Rossum.

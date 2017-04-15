@@ -1,0 +1,257 @@
+.TH X11-STDWIN 1
+.SH NAME
+X11-STDWIN \- a Standard Window System Interface, X11 version
+.SH SYNOPSIS
+.I application
+[
+.B \-display
+.I display-name
+]
+[
+.B \-name
+.I program-name
+]
+[
+.B \-geometry
+.I geometry-spec
+]
+ [
+.B \-font
+.I font-name
+]
+[
+.B \-menufont
+.I font-name
+]
+[
+.B \-iconic
+]
+[
+.B \-icongeometry
+.I geometry-spec
+]
+ [
+.B \-foreground
+.I color-spec
+]
+[
+.B \-background
+.I color-spec
+]
+ [
+.B \-menuforeground
+.I color-spec
+]
+[
+.B \-menubackground
+.I color-spec
+]
+ [
+.B \-reverse
+]
+[
+.B \-xrm
+.I string
+]
+[
+.B \-debuglevel
+.I number
+]
+[
+.B \-synchronous
+]
+[
+.I option
+] ...
+.SH DESCRIPTION
+.I STDWIN
+is a standard interface available for several window systems.
+This man page describes the common aspects of applications written using
+STDWIN when run under MIT's X Window System, Version 11.
+.SH COMMAND LINE OPTIONS
+Most applications (to be precise, those that use the
+.I winitnew
+call to initialize STDWIN) will accept all options shown in the
+synopsis.
+For most options there can also be a corresponding
+.I resource
+(option string stored in the X server or in ~/.Xdefaults).
+Command line options override resources; resources override defaults
+built in the application; application defaults override library defaults.
+Unless otherwise stated, the resources have the same name as the command
+line options (all in lower case), prefixed with ``.stdwin''.
+For example, the full name of the resource corresponding to the
+``\-font'' option is named
+.IR program .stdwin.font.
+Since most options have a standard meaning for most X applications, they
+are not explained in great length here.
+Options with a specific meaning for STDWIN are:
+.TP
+.BI \-font " font-name"
+Specifies the font to be used by default in text drawn by the
+application.
+Both proportional and fixed-width fonts are acceptable
+(except that some old applications look nicer with a fixed-width font).
+The library default is to use the X server's default (usually 8x13).
+.TP
+.BI \-menufont " font-name"
+Specifies the font to be used in menus and dialog boxes.
+The library default is to use the same font as for normal text.
+.TP
+.BI \-foreground " color-spec, " \-background " color-spec"
+Specify the colors to be used in the application's part of the window.
+The defaults are black and white.
+.TP
+.BI \-menuforeground " color-spec, " \-menubackground " color-spec"
+Specify the colors to be used in the menu bar, the scroll bars,
+dialog boxes and for the window border (the foreground color).
+By default the same values are used as for
+.B \-foreground
+and
+.BR \-background .
+.TP
+.B \-reverse
+Reverses the uses of foreground and background colors.
+.TP
+.BI \-debuglevel " number"
+Specifies the amount of debugging output you want; the higher the
+number, the more output you have to wade through.
+The library default is wisely 0.
+.TP
+.B \-synchronous
+Specifies that you want the connection with the X server to be
+maintained in synchronous mode (each request immediately sent and a
+reply waited for).
+This is sometimes useful while debugging.
+Note that synchronous mode can tremendously reduce drawing efficiency.
+Synchronous mode is not set automatically when the debugging level is
+nonzero, since some bugs go away when it is turned on!
+This option has no corresponding resource.
+.SH SCROLL BARS
+All STDWIN applications have two scroll bars (which may be inactive),
+one to the left of the window and one at the bottom.
+Operation and interpretation of the scroll bars is intended to be
+identical to the scroll bars of applications using the X toolkit
+(e.g., xterm).
+Summarizing:
+the left button click scrolls forward, the amount varying with
+the position of the click in the bar (for the vertical bar, remember
+``line to top'');
+the right button similarly scrolls back (``top to line'');
+the middle button moves the beginning of the position indicator
+(the gray block) to the position where the button is pressed.
+.SH MENUS
+All STDWIN applications display one or more menu titles in a
+``menu bar'' at the top of the window.
+Pressing and holding a mouse button in a menu title ``pulls down'' a
+menu containing text items.
+Sliding the mouse cursor over the text items
+inverts (highlights) the item over which the cursor is currently;
+releasing the mouse button when an item is highlighted causes the
+corresponding command th be executed by the application.
+Releasing the mouse button outside the menu selects no item.
+Sliding the mouse horizontally over the menu titles pulls down the other
+menus; at most one menu will be visible at any time.
+.PP
+One menu, labeled
+.BR X ,
+is present in all windows.
+Its only item, named
+.BR Close ,
+is the standard way to close the window; for single-window applications,
+selecting this also quits the application.
+The application is free to refuse closing its window, or to ask
+confirmation first, or to do whatever when this item is selected; it is
+merely a hint that you would like the window to go away, not a request.
+.PP
+Menu items may be marked (``checked'') with a `*' in the left margin; this
+an indicator that the function selected by the menu item is currently
+``active''.
+The check mark can be set and cleared by the application for each menu
+item; the use should be apparent from the application's documentation.
+Menu items may be inactive (``disabled''); such items cannot be selected
+and will not be highlighted.
+Disabled items are currently indicated by a `\-' in the left margin.
+.PP
+Menu items may be selectable via a keyboard shortcut.
+The existence of a keyboard shortcut is shown in the menu item by the
+presence of the string
+.RI ``M- c ''
+in the right margin, where
+.I c
+can be any character.
+The M stands for ``Meta''.
+Holding a ``Meta'' key (possibly labeled Alt, Command, Compose, Left or
+some such name on your keyboard, but definitely not Control or Shift)
+while typing a character, usually a letter, will be
+equivalent to selecting the corresponding menu item with the mouse.
+Shortcuts are defined by the application.
+Some shortcuts are conventional in many applications:
+M-Q for Quit, M-S for Save, M-O for Open.
+Also M-Z for Undo, M-X for Cut, M-C for Copy and M-V for Paste
+(reminiscent of the Macintosh commands).
+Upper and lower case characters are equivalent, unless the application
+uses the same letter in lower and upper case as shortcuts for
+different menu items.
+.\"SH DIALOG BOXES
+.\"SH TEXT EDITING
+.\" selecting, button-2 selecting, double-click, cut/paste, delete, arrows.
+.SH EXAMPLE
+Here are some lines you could put in your resource input file:
+
+	*stdwin*font:courier12f
+.br
+	dpv*geometry:700x850
+.br
+	klok*geometry:-1+1
+
+This sets the font for all STDWIN applications, the initial size for
+.I dpv
+and the initial position for
+.I klok.
+Note the use of `*' for separators; extra levels of names may be
+inserted in the future.
+.SH DIAGNOSTICS
+.I STDWIN
+can issue complaints about various error conditions, e.g., font not found;
+these are intended to be self-explanatory.
+Some messages indicate STDWIN has found an inconsistency in
+itself or in the X server.
+These should be reported to the author if the cause isn't obvious.
+.\"SH FILES
+.SH SEE ALSO
+The X documentation (especially the chapters on command line arguments
+and resources).
+.br
+STDWIN \- A Standard Window System Interface, by Guido van Rossum
+(CWI Report number CS-R8817, April 1988).
+.SH AUTHOR
+Guido van Rossum
+.SH BUGS
+I could be sued by Apple for stealing the ``look and feel'' of some
+aspects of the Macintosh. :-)
+.br
+The
+.B \-reverse
+option doesn't affect the use of colors in dialog boxes.
+.br
+Like so many other window systems, X11 limits the size of windows to
+64Kx64K.
+.br
+Since a STDWIN document is represented as an X11 window (scrolled inside
+another X11 window), applications that create really big windows (~32K
+pixels wide or high) may crash due to a server bug.
+.br
+When an application does no window output for some time after a menu
+item has been selected, the menu stays visible in its pulled-down state.
+.br
+The conventional shortcuts for Undo, Cut and Paste aren't very mnemonic.
+(But Apple never thought that was a problem.)
+.br
+The standard X-STDWIN command line options are best given before all
+application-specific options.
+.br
+If you are running an application in the background and have
+.I "stty tostop"
+turned on, warnings or errors from STDWIN may cause the program to
+block.

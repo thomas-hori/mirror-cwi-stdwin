@@ -1,0 +1,7 @@
+#!/bin/sh
+# Make funny character translation tables
+
+for file
+do
+	sed "s/ - /	`basename $file`	/" $file
+done

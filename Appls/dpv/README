@@ -1,0 +1,50 @@
+Name:		dpv -- Ditroff previewer using STDWIN
+Author:		Guido van Rossum
+Started:	Jan 12 1988
+
+Ditroff output describes pages to be typeset (see comments in the source
+for a description).
+Pages are started by 'p' commands.
+Each page is a contiguous segment of the file, but operations within a
+page can contain arbitrary vertical movements.  I have made the decision
+not to display the entire file as one document, since this would limit
+us to approx. 32 pages (given a practical limit on STDWIN documents of
+32K pixels, and an average screen height of 1K pixels).
+To allow reasonably efficient displaying, we need to remember the file
+offsets where each page starts in the input, and the state of the
+ditroff engine at the start of the page (font etc.).  Thus, we must make
+a pre-scan of the input to compute this info; after that, the draw
+procedure only needs to read the particular page being displayed.
+(Note that it would be easy enough to change the interface so that all
+pages are mapped to a single document.)
+As an optimization, we actually don't pre-scan the entire file when the
+program starts up; rather, when a page is first displayed the pre-scan
+information is computed as a by-product of the displaying process.
+There are two page numbering schemes: internally, the pages are always
+numbered 0, 1, ..., with 0 being the configuration data (everything that
+comes before the first 'p' command).  Externally, page numbers are taken
+from the argument to the 'p' command.
+
+State to remember for each page start:
+- mounted fonts ('x f' command)
+- character height and slant ('x H' and 'x S' commands) (not used?)
+- current font and size
+
+The following state, although it can be reset using 'x' commands, is
+assumed to be set once and for all on page 0:
+- device name ('x T' command)
+- resolution ('x r' command)
+
+Formally, one should also remember the stack of state records
+manipulated by '{' and '}' commands; I assume these are used only by
+pictures, and the stack is empty at page boundaries.
+
+TO DO:
+
+Print special chars as what they should look like, instead of as their
+ditroff names.
+
+Use real troff fonts.  This requires a translation between ASCII codes
+output by ditroff and character codes in the font.  Perhaps the fonts
+should be stored different, so that for ASCII at least no mapping is
+necessary.

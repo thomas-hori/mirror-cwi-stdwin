@@ -1,0 +1,52 @@
+.c.obj:
+	cl -c -AL -DSYSV $*.c
+
+TOOLS=		strdup.obj getopt.obj monocase.obj
+
+strdup.obj:
+
+getopt.obj:
+
+monocase.obj:
+
+TEXTEDIT=	textedit.obj textbrk.obj par.obj \
+		askfile.obj askync.obj style.obj
+
+textedit.obj:
+
+textbrk.obj:
+
+par.obj:
+
+askfile.obj:
+
+askync.obj:
+
+style.obj:
+
+VTRM=		vtrm.obj
+
+vtrm.obj:
+
+ALFA=		bind.obj draw.obj event.obj keymap.obj measure.obj \
+		menu.obj scroll.obj stdwin.obj syswin.obj
+
+bind.obj: alfa.h
+
+draw.obj: alfa.h
+
+event.obj: alfa.h
+
+keymap.obj: alfa.h
+
+measure.obj: alfa.h
+
+menu.obj: alfa.h
+
+scroll.obj: alfa.h
+
+stdwin.obj: alfa.h
+
+syswin.obj: alfa.h
+
+ALL=		$(TOOLS) $(TEXTEDIT) $(VTRM) $(ALFA)

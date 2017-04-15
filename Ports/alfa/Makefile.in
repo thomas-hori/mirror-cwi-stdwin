@@ -1,0 +1,108 @@
+#
+# Makefile for termcap stdwin library port
+#
+
+# Substitutions by configure
+srcdir=		@srcdir@
+VPATH=		@srcdir@
+INSTALL=	@INSTALL@
+
+CC=		@CC@
+RANLIB=		@RANLIB@
+AR=		@AR@
+
+DEFS=		@DEFS@
+LIBS=		@LIBS@
+OPT=		@OPT@
+
+# Install prefixes, may be changed by configure
+prefix=		/usr/local
+exec_prefix=	$(prefix)
+
+# Programs
+SHELL=		/bin/sh
+
+# Pointers to other directories
+topdir=		$(srcdir)/../..
+TOOLS=		$(topdir)/Tools
+VTRM=		$(topdir)/Ports/vtrm
+GEN=		$(topdir)/Gen
+H=		$(topdir)/H
+
+CFLAGS=		$(OPT) -I$(H) -I$(VTRM) $(DEFS)
+
+OBJS=		\
+		bind.o \
+		draw.o \
+		event.o \
+		keymap.o \
+		measure.o \
+		menu.o \
+		scroll.o \
+		stdwin.o \
+		syswin.o \
+		timer.o \
+		vtrm.o \
+		strdup.o \
+		waskfile.o \
+		waskync.o \
+		wperror.o \
+		wsetclip.o \
+		wsetcutbuffer.o \
+		wsetselection.o \
+		wstyle.o
+
+all:		libstdwin.a
+
+libstdwin.a:	$(OBJS)
+		@rm -f @
+		$(AR) cr @ $(OBJS)
+		$(RANLIB) @		
+		mv @ libstdwin.a
+
+bind.o: bind.c
+draw.o: draw.c
+event.o: event.c
+keymap.o: keymap.c
+measure.o: measure.c
+menu.o: menu.c
+scroll.o: scroll.c
+stdwin.o: stdwin.c
+syswin.o: syswin.c
+timer.o: timer.c
+
+vtrm.o:		$(VTRM)/vtrm.c
+		$(CC) $(CFLAGS) -c $(VTRM)/vtrm.c
+
+strdup.o:	$(TOOLS)/strdup.c
+		$(CC) $(CFLAGS) -c $(TOOLS)/strdup.c
+
+waskfile.o:	$(GEN)/waskfile.c
+		$(CC) $(CFLAGS) -c $(GEN)/waskfile.c
+
+waskync.o:	$(GEN)/waskync.c
+		$(CC) $(CFLAGS) -c $(GEN)/waskync.c
+
+wperror.o:	$(GEN)/wperror.c
+		$(CC) $(CFLAGS) -c $(GEN)/wperror.c
+
+wsetclip.o:	$(GEN)/wsetclip.c
+		$(CC) $(CFLAGS) -c $(GEN)/wsetclip.c
+
+wsetcutbuffer.o: $(GEN)/wsetcutbuffer.c
+		$(CC) $(CFLAGS) -c $(GEN)/wsetcutbuffer.c
+
+wsetselection.o: $(GEN)/wsetselection.c
+		$(CC) $(CFLAGS) -c $(GEN)/wsetselection.c
+
+wstyle.o:	$(GEN)/wstyle.c
+		$(CC) $(CFLAGS) -c $(GEN)/wstyle.c
+
+wtextbreak.o:	$(GEN)/wtextbreak.c
+		$(CC) $(CFLAGS) -c $(GEN)/wtextbreak.c
+
+clean::
+		-rm -f *.o core *~ [,@#]* .[,@#]*
+
+clobber::	clean
+		-rm -f *.a tags TAGS

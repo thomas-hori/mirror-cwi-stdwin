@@ -1,0 +1,53 @@
+#
+# Makefile for textedit package
+#
+
+# Substitutions by configure
+srcdir=		@srcdir@
+VPATH=		@srcdir@
+INSTALL=	@INSTALL@
+
+CC=		@CC@
+RANLIB=		@RANLIB@
+AR=		@AR@
+
+DEFS=		@DEFS@
+LIBS=		@LIBS@
+OPT=		@OPT@
+
+# Install prefixes, may be changed by configure
+prefix=		/usr/local
+exec_prefix=	$(prefix)
+
+# Programs
+SHELL=		/bin/sh
+
+# Pointers to other directories
+topdir=		$(srcdir)/../..
+TOOLS=		$(topdir)/Tools
+GEN=		$(topdir)/Gen
+H=		$(topdir)/H
+
+CFLAGS=		$(OPT) -I$(H) $(DEFS)
+
+OBJS=		textedit.o textlow.o textdbg.o editwin.o wprintf.o
+
+all:		libtextedit.a
+
+libtextedit.a:	$(OBJS)
+		@rm -f @
+		$(AR) cr @ $(OBJS)
+		$(RANLIB) @		
+		mv @ libtextedit.a
+
+textedit.o: textedit.c
+textlow.o: textlow.c
+textdbg.o: textdbg.c
+editwin.o: editwin.c
+wprintf.o: wprintf.c
+
+clean::
+		@rm -f *.o core *~ [,@#]* .[,@#]*
+
+clobber::	clean
+		@rm -f *.a tags TAGS

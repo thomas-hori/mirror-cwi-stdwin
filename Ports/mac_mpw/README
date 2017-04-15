@@ -1,0 +1,9 @@
+This directory contains extra files needed to build stdwin for the Mac
+under MPW 2.0.2.  Take these files together with all the files from the
+mac subdirectory, plus strdup.c, getopt.c and wtextbreak.c from
+elsewhere in the stdwin tree.  The Makefile will build the library.
+
+Disclaimer: this hasn't been tested fully yet -- it is just provided in
+case you are stuck with MPW.
+
+--Guido (8 Jan 1991)

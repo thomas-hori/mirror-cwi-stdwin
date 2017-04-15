@@ -1,0 +1,432 @@
+[Last modified on Wed Apr 17 10:37:36 MET DST 1991 by frank (Chapters 0, 1, 2)]
+[     modified on Sat Apr 15 20:19:00 MET DST 1989 by guido]
+
+
+0. Copyright Notice
+
+/***********************************************************
+Copyright 1988-1995 by Stichting Mathematisch Centrum, Amsterdam, The
+Netherlands.
+
+                        All Rights Reserved
+
+Permission to use, copy, modify, and distribute this software and its 
+documentation for any purpose and without fee is hereby granted, 
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in 
+supporting documentation, and that the names of Stichting Mathematisch
+Centrum or CWI not be used in advertising or publicity pertaining to
+distribution of the software without specific, written prior permission.
+
+STICHTING MATHEMATISCH CENTRUM DISCLAIMS ALL WARRANTIES WITH REGARD TO
+THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+FITNESS, IN NO EVENT SHALL STICHTING MATHEMATISCH CENTRUM BE LIABLE
+FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT
+OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+******************************************************************/
+
+1. Target systems
+
+STDWIN is aimed at C programs.  It consists of a few header files (of
+which only one is visible to the user) and a library.  In most cases
+some system-provided libraries must also be used in the linking phase.
+
+Currently, full STDWIN is available for the following environments:
+
+(Note that in all cases the code is in beta test state; there may be
+bugs, functionality may change slightly in the future and new
+functionality may be added, but the basic framework isn't going to
+change much.)
+
+*       X version 11, release 4 (should still work with release 2 and 3)
+*       Apple Macintosh, using either THINK C (4.02) or MPW C (2.02)
+
+You may volunteer to create a version for your favourite system, or to
+port it to your favourite C compiler for the mentioned micro.
+
+A subset, emulating most of STDWIN's functionality on an alphanumeric
+display (excluding line drawing, but including multiple (non-overlapping)
+windows, menus, text editing etc.) is available for:
+
+*       Any decent Unix that has termcap (tested with 4.{2,3} BSD)
+*       MS-DOS, using the Microsoft C compiler (4.0)
+
+Sorry, there are no versions yet for SunTools, SunView, NeWS, X10,
+MS-Windows, Presentation Manager, Atari ST or the Amiga.
+The code is remarkably portable to different processor types and
+various Unix flavors, as long as they are derived from 4.xBSD.
+
+
+2. Getting the full scoop
+
+I have written a paper about STDWIN which has been published as a
+CWI report (Guido van Rossum: STDWIN -- A Standard Window System
+Interface.  Centre for Mathematics and Computer Science, report
+CS-R8817.  Amsterdam, 1988).
+
+STDWIN was posted to alt.sources around february 1991.
+It should be available from sites that archive this newsgroup, but I
+have no information on that.  I also post patches to this group.  (I
+will post the entire source to comp.sources.misc when I think the
+product is a little bit more finished.)
+
+STDWIN is available from a number of ftp sites.
+The * in file names is the version number, e.g., 0.9.5 (the last digit
+is the patch level).
+
+Current version number is 0.9.6 .
+
+site		hp4nl.nluug.nl (IP address 192.16.202.2)
+for whom	users in the Netherlands and the rest of Europe
+file		pub/windows/stdwin*.tar.Z
+
+site		wuarchive.wustl.edu (IP address 128.252.135.4)
+for whom	users in North America
+file		pub/stdwin*.tar.Z
+		
+site		gatekeeper.dec.com (IP address 16.1.0.2)
+for whom	users in North America
+file		pub/misc/stdwin*.tar.Z
+
+Distribution to to non-ftp-users is solely by electronic mail.  Be
+prepared to receive up to half a megabyte (in 32K pieces in "shar"
+format).  If you're interested, write to guido@cwi.nl.
+
+
+3. Basic functionality
+
+STDWIN allows multiple "full-function" windows, roughly in Macintosh
+style (title bar, grow box, close box, scroll bars).  The appearance of
+windows is determined by the default of the underlying window manager,
+and so are other limitations (e.g., overlapping, maximum size, etc.).
+Windows are dynamically created and destroyed by the application, never
+directly by the user or the window manager.
+
+STDWIN uses a coordinate system derived from the display's coordinate
+system: (0, 0) is top left, with X pointing right and Y pointing down
+(these are actually called h and v).  Pixel size is that of the display.
+There are enquiry functions to ask for the display size in pixels and in
+millimeters.
+
+The application is responsible for redrawing the window contents when it
+is exposed.  This is done by associating a "draw procedure" with each
+window, which knows how to draw the entire window's contents.  It gets
+passed a pointer to the window and the coordinates of the rectangle that
+needs to be redrawn, so it can (although it needn't) restrict itself to
+that area.  STDWIN guarantees that a window's redraw procedure is only
+called while the application is waiting for an input event (most
+implementations simply turn exposure events into calls to the draw
+procedure).
+
+If the application wants to change part of the graphics it is
+displaying, this is usually done in a two-phase process: first, STDWIN
+is told that a particular area of the screen must be changed; later,
+when the application starts waiting for input events again, the draw
+procedure is called to update the indicated area (and any other area
+that was exposed or damaged in some way).
+
+The application defines the width and height of the area it wants to
+draw; this needn't bear any relation to the window or screen size.  This
+area is called the "document" although you may also think of it as a
+virtual window.  The actual window generally displays a sub-area of the
+document; the window's scroll bars indicate the position of the window
+with respect to the document.  The application always uses the
+coordinates of its document; STDWIN performs the translation to window
+or screen coordinates are required by the window manager, and ensures
+clipping of all output to the window.
+
+STDWIN is event-based.  An application is expected to have a main loop
+containing a "get event" call followed by a switch on the event type.
+There is no event mask; an application can simply ignore events it isn't
+interested in.  The most important event types are:
+
+ACTIVATE:       A window becomes active (keyboard attached and/or topmost)
+
+CHAR:           ASCII character key pressed (except BS, TAB, CR)
+
+COMMAND:        special key or function (CLOSE, TAB, RETURN, BS, CANCEL,
+                arrow keys etc.)
+
+MOUSE:          MOUSE DOWN, MOUSE MOVE (only while down), MOUSE UP;
+                fields in the event record indicate the h, v position,
+                the number of the button, and the "click number" if the
+                event is potentially part of a multiple-click sequence
+
+MENU:           menu id and item number of a menu selection
+
+SIZE:           user has resized the window
+
+TIMER:          the window's timer went off; each window has one
+                programmable timer which can be set to go off at N/10
+                seconds in the future.  When the timer goes off a TIMER
+                event is returned.
+
+Normally, STDWIN draws text in a single font.  The actual font used
+depends on the underlying window manager (and can sometimes be
+influenced by the application programmer and/or the end user in a
+system-dependent manner).  The font may be proportionally spaced, and
+there are enquiry functions to find out the dimensions of characters and
+strings.  There are also functions to change the font name and point
+size dynamically; but these work different in different systems,
+especially the allowed font names differ drastically.  This feature is
+used with some success in the ditroff previewer that is supplied as a
+demo.
+
+There are functions to draw text and simple lines, rectangles and
+circles, and ways to erase, shade or invert rectangular areas.  There is
+no way (yet) to do general bitblt operations, or to influence the pen
+shape.
+
+
+4. Higher level functionality
+
+STDWIN provides a blinking vertical bar which can be used to indicate
+the text insertion point, so the application needn't use TIMER events to
+do the blinking.
+
+STDWIN provides Macintosh-style menus.  Each window has its own set of
+menus, although by default all menus apply to all windows.  A reasonably
+number of menus per window is allowed, each with a reasonable number of
+(textual) menu items.  Menus can be changed dynamically.  Items can be
+enabled or disabled, and a 'tick mark' can be placed in front of an
+item.  Each menu item may have a shortcut character, which, when typed
+in combination with some system-defined meta key (e.g., ALT or an ESC-
+prefix) selects the menu item (if enabled).  Menu selection is done
+completely "underwater"; all the application notices are MENU events.
+
+STDWIN has a few simple routines to display Mac-style "dialog boxes",
+e.g., to show an error message, or to ask a yes/no question or to ask
+for a string to be typed.  There is also a predefined function to ask
+for a file name, which may allow the user to browse the file system in
+some implementations.
+
+STDWIN comes with a package built on top of the basic functionality, to
+edit arbitrary blocks of text (cf. Macintosh TEXTEDIT).  In the future,
+more packages will be provided, e.g., a package to provide a simple file
+editor (available now!), a package to display a scrolling list of items,
+a package to define a list of arbitrary labeled "buttons", and a package
+to simplify the binding of menus to functions somewhat, and a VT100
+emulator (available now!).
+
+
+5. Function definitions
+
+Here follows a slightly edited listing of the <stdwin.h> header file,
+which more or less documents all available functions and data
+structures.  Note that the argument lists are given here as ANSI C
+prototypes (untested).
+
+#define bool int
+
+void winit();
+void wdone();
+
+void wsetdefwinsize(int width, int height);
+void wsetdefwinpos(int h, int v);
+
+#define MENU struct menu
+
+/* The contents of a text attributes struct are disclosed here because
+   the interface allows the programmer to declare objects of this type.
+   (I'm not so sure anymore that this is the right thing to do!) */
+
+struct textattr {
+        short font;
+        unsigned char size;
+        unsigned char style;
+};
+
+#define TEXTATTR struct textattr
+
+#ifndef WINDOW
+
+struct window {
+        short tag;
+};
+
+#define WINDOW struct window
+
+#endif
+
+WINDOW *wopen(char *title, void drawproc();
+void wclose(WINDOW *win);
+#define wgettag(win) ((win)->tag)
+#define wsettag(win, newtag) ((win)->tag= newtag)
+void wsetactive(WINDOW *win);
+WINDOW *wgetactive();
+void wgetwinsize(WINDOW *win, int *width, int *height);
+void wsetdocsize(WINDOW *win, int width, int height);
+void wsettitle(WINDOW *win, char *title);
+
+void wsetorigin(WINDOW *win, int h, int v);
+void wshow(WINDOW *win, int left, int top, int right, int bottom);
+void wchange(WINDOW *win, int left, int top, int right, int bottom);
+void wscroll(WINDOW *win, int left, int top, int right, int bottom,
+        int dh, int dv);
+
+void wfleep();
+void wmessage(char *str);
+void wperror(char *name);
+bool waskstr(char *prompt, char *buf, int buflen);
+int waskync(char *question, int dflt);
+bool waskfile(char *prompt, char *buf, int buflen, bool new);
+
+void wsetcaret(WINDOW *win, int h, int v);
+void wnocaret(WINDOW *win);
+
+void wsettimer(WINDOW *win, int deciseconds);
+
+MENU *wmenucreate(int id, char *title);
+void wmenudelete(MENU *mp);
+int wmenuadditem(MENU *mp, char *text, char shortcut);
+void wmenusetitem(MENU *mp, int i, char *text);
+void wmenusetdeflocal(bool local);
+void wmenuattach(WINDOW *win, MENU *mp);
+void wmenudetach(WINDOW *win, MENU *mp);
+
+/* EVENT STRUCT DEFINITION */
+
+struct event {
+        int type;
+        WINDOW *window;
+        union {
+        /* case WE_CHAR: */
+                int character;
+        /* case WE_COMMAND: */
+                int command;
+        /* case WE_MENU: */
+                struct { int id; int item; } m;
+        /* case WE_DRAW: */
+                struct { int left, top, right, bottom; } area;
+        /* case WE_MOUSE_DOWN, WE_MOUSE_MOVE, WE_MOUSE_UP: */
+                struct {
+                        int v;
+                        int h;
+                        int clicks;
+                        int button;
+                        int mask;
+                } where;
+        } u;
+};
+
+#define EVENT struct event
+
+/* Event types */
+
+#define WE_NULL         0       /* (Used internally) */
+#define WE_ACTIVATE     1       /* Window became active */
+#define WE_CHAR         2       /* Character typed at keyboard */
+#define WE_COMMAND      3       /* Special command, function key etc. */
+#define WE_MOUSE_DOWN   4       /* Mouse button pressed */
+#define WE_MOUSE_MOVE   5       /* Mouse moved with button down */
+#define WE_MOUSE_UP     6       /* Mouse button released */
+#define WE_MENU         7       /* Menu item selected */
+#define WE_SIZE         8       /* Window size changed */
+#define WE_MOVE         9       /* (Reserved) */
+#define WE_DRAW         10      /* Request to redraw part of window */
+#define WE_TIMER        11      /* Window's timer went off */
+#define WE_DEACTIVATE   12      /* Window became inactive */
+
+/* Command codes for WE_COMMAND.
+   Special ways of entering these are usually available,
+   such as clicking icons, standard menu items or special keys.
+   Some ASCII keys are also passed back as commands since they
+   more often than not need special processing. */
+
+#define WC_CLOSE        1       /* Should become a separate event! */
+/* The following four are arrow keys */
+#define WC_LEFT         2
+#define WC_RIGHT        3
+#define WC_UP           4
+#define WC_DOWN         5
+/* ASCII keys */
+#define WC_CANCEL       6
+#define WC_BACKSPACE    7
+#define WC_TAB          8
+#define WC_RETURN       9
+
+void wgetevent(EVENT *ep);
+void wungetevent(EVENT *ep);
+void wupdate(WINDOW *win);
+void wbegindrawing(WINDOW *win);
+void wenddrawing(WINDOW *win);
+void wflush();
+
+void wdrawline(int h1, int v1, int h2, int v2);
+void wxorline(int h1, int v1, int h2, int v2);
+void wdrawcircle(int h, int v, int radius);
+void wdrawelarc(int h, int v, int radh, int radv, int angle1, int angle2);
+void wdrawbox(int left, int top, int right, int bottom);
+void werase(int left, int top, int right, int bottom);
+void wpaint(int left, int top, int right, int bottom);
+void winvert(int left, int top, int right, int bottom);
+void wshade(int left, int top, int right, int bottom, int percent);
+
+int wdrawtext(int h, int v, char *str, int len);
+int wdrawchar(int h, int v, char c);
+int wlineheight();
+int wtextwidth(char *str, int len);
+int wcharwidth(char c);
+int wtextbreak(char *str, int len, int width);
+
+void wgettextattr(TEXTATTR *attr);
+void wsettextattr(TEXTATTR *attr);
+void wgetwintextattr(WINDOW *win, TEXTATTR *attr);
+void wsetwintextattr(WINDOW *win, TEXTATTR *attr);
+
+void wsetplain();
+void wsethilite();
+void wsetinverse();
+void wsetitalic();
+void wsetbold();
+void wsetbolditalic();
+void wsetunderline();
+
+/* TEXTEDIT PACKAGE DEFINITIONS */
+
+#define TEXTEDIT struct _textedit
+
+TEXTEDIT *tealloc(WINDOW *win, int left, int top, int width);
+TEXTEDIT *tecreate(WINDOW *win,
+        int left, int top, int right, int bottom);
+void tefree(TEXTEDIT *tp);
+void tedestroy(TEXTEDIT *tp);
+
+void tedraw(TEXTEDIT *tp);
+void tedrawnew(TEXTEDIT *tp, int left, int top, int right, int bottom);
+void temove(TEXTEDIT *tp, int left, int top, int width);
+void temovenew(TEXTEDIT *tp,
+        int left, int top, int right, int bottom);
+
+void tesetfocus(TEXTEDIT *tp, int foc1, int foc2);
+void tereplace(TEXTEDIT *tp, char *str);
+void tesetbuf(TEXTEDIT *tp, char *buf, int buflen);
+
+void tearrow(TEXTEDIT *tp, int code);
+void tebackspace(TEXTEDIT *tp);
+bool teclicknew(TEXTEDIT *tp, int h, int v, bool extend);
+bool tedoubleclick(TEXTEDIT *tp, int h, int v);
+bool teevent(TEXTEDIT *tp, EVENT *ep);
+
+#define teclick(tp, h, v) teclicknew(tp, h, v, FALSE)
+#define teclickextend(tp, h, v) teclicknew(tp, h, v, TRUE)
+
+char *tegettext(TEXTEDIT *tp);
+int tegetlen(TEXTEDIT *tp);
+int tegetnlines(TEXTEDIT *tp);
+int tegetfoc1(TEXTEDIT *tp);
+int tegetfoc2(TEXTEDIT *tp);
+int tegetleft(TEXTEDIT *tp);
+int tegettop(TEXTEDIT *tp);
+int tegetright(TEXTEDIT *tp);
+int tegetbottom(TEXTEDIT *tp);
+
+/* Text paragraph drawing functions: */
+
+int wdrawpar(int h, int v, char *text, int width);
+        /* Returns new v coord. */
+int wparheight(char *text, int width);
+        /* Returns height */

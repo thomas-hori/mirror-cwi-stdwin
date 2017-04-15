@@ -1,0 +1,50 @@
+dnl Process this file with autoconf 1.9 or later to make a configure script.
+AC_PREREQ(1.9)dnl
+AC_INIT(H/stdwin.h)
+
+# checks for alternative programs
+AC_MSG_CHECKING(for --without-gcc)
+AC_ARG_WITH(gcc, [--without-gcc             never use gcc], [
+	case $withval in
+	no)	CC=cc
+		without_gcc=yes;;
+	yes)	CC=gcc
+		without_gcc=no;;
+	*)	CC=$withval
+		without_gcc=$withval;;
+	esac], [without_gcc=no])
+AC_MSG_RESULT($without_gcc)
+
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_SUBST(AR)
+: ${AR=ar}
+AC_SUBST(INSTALL)
+: ${INSTALL=cp}
+AC_SUBST(OPT)
+: ${OPT=-O}
+
+# check for X files (requires autoconf 1.9)
+AC_FIND_XTRA
+
+# check for libraries
+AC_CHECK_LIB(nsl, t_open, [LIBS="-lnsl $LIBS"]) # SVR4
+
+# checks for header files
+AC_HAVE_HEADERS(sgtty.h signal.h stdlib.h termio.h sys/select.h sys/time.h)
+
+# checks for typedefs
+AC_RETSIGTYPE
+
+# checks for library functions
+AC_HAVE_FUNCS(setlinebuf system strchr strrchr memcpy memcmp)
+
+# checks for compiler characteristics
+AC_CHECKING(for prototypes)
+AC_TEST_PROGRAM([
+int foo(int x) { return 0; }
+int main() { return foo(10); }
+], AC_DEFINE(HAVE_PROTOTYPES) have_prototypes=1)
+
+# generate output files
+AC_OUTPUT(Makefile Ports/Makefile Ports/x11/Makefile Ports/alfa/Makefile Packs/Makefile Packs/textedit/Makefile Appls/Makefile Appls/miniedit/Makefile Appls/klok/Makefile)

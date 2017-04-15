@@ -1,0 +1,99 @@
+#
+# Makefile for X11 stdwin library port
+#
+
+# Substitutions by configure
+srcdir=		@srcdir@
+VPATH=		@srcdir@
+INSTALL=	@INSTALL@
+
+CC=		@CC@
+RANLIB=		@RANLIB@
+AR=		@AR@
+
+DEFS=		@DEFS@
+LIBS=		@LIBS@
+OPT=		@OPT@
+X_CFLAGS=	@X_CFLAGS@
+
+# Install prefixes, may be changed by configure
+prefix=		/usr/local
+exec_prefix=	$(prefix)
+
+# Programs
+SHELL=		/bin/sh
+
+# Pointers to other directories
+topdir=		$(srcdir)/../..
+TOOLS=		$(topdir)/Tools
+GEN=		$(topdir)/Gen
+H=		$(topdir)/H
+
+CFLAGS=		$(OPT) -I$(H) $(DEFS) $(X_CFLAGS)
+
+OBJS=		\
+		caret.o \
+		cursor.o \
+		cutbuffer.o \
+		dialog.o \
+		draw.o \
+		error.o \
+		event.o \
+		font.o \
+		general.o \
+		llevent.o \
+		menu.o \
+		selection.o \
+		scroll.o \
+		timer.o \
+		window.o \
+		strdup.o \
+		waskfile.o \
+		wperror.o \
+		wsetclip.o \
+		wtextbreak.o
+
+all:		libstdwin.a
+
+libstdwin.a:	$(OBJS)
+		@rm -f @
+		$(AR) cr @ $(OBJS)
+		$(RANLIB) @		
+		mv @ libstdwin.a
+
+caret.o: caret.c
+cursor.o: cursor.c
+cutbuffer.o: cutbuffer.c
+dialog.o: dialog.c
+draw.o: draw.c
+error.o: error.c
+event.o: event.c
+font.o: font.c
+general.o: general.c
+llevent.o: llevent.c
+menu.o: menu.c
+selection.o: selection.c
+scroll.o: scroll.c
+timer.o: timer.c
+window.o: window.c
+
+strdup.o:	$(TOOLS)/strdup.c
+		$(CC) $(CFLAGS) -c $(TOOLS)/strdup.c
+
+waskfile.o:	$(GEN)/waskfile.c
+		$(CC) $(CFLAGS) -c $(GEN)/waskfile.c
+
+wperror.o:	$(GEN)/wperror.c
+		$(CC) $(CFLAGS) -c $(GEN)/wperror.c
+
+wsetclip.o:	$(GEN)/wsetclip.c
+		$(CC) $(CFLAGS) -c $(GEN)/wsetclip.c
+
+wtextbreak.o:	$(GEN)/wtextbreak.c
+		$(CC) $(CFLAGS) -c $(GEN)/wtextbreak.c
+
+clean::
+		-rm -f *.o core *~ [,@#]* .[,@#]*
+
+clobber::	clean
+		-rm -f *.a tags TAGS

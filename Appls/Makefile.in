@@ -1,0 +1,21 @@
+
+# Compiler options passed to subordinate makes
+OPT=		@OPT@
+
+# Subdirectories where to run make recursively
+SUBDIRS=	miniedit klok
+
+all:
+		for i in $(SUBDIRS); do \
+			(echo $$i; cd $$i; $(MAKE) OPT="$(OPT)" all); \
+		done
+
+clean:
+		for i in $(SUBDIRS); do \
+			(echo $$i; cd $$i; $(MAKE) OPT="$(OPT)" clean); \
+		done
+
+clobber:
+		for i in $(SUBDIRS); do \
+			(echo $$i; cd $$i; $(MAKE) OPT="$(OPT)" clobber); \
+		done

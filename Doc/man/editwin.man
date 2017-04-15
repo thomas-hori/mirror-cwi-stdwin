@@ -1,0 +1,301 @@
+.TH EDITWIN 3
+.SH NAME
+Editwin \- editing windows package for STDWIN
+.SH SYNOPSIS
+.nf
+.ft C
+#include "stdwin.h"
+#include "editwin.h"
+
+typedef struct editwin {
+	WINDOW *win;
+	TEXTEDIT *tp;
+	char *filename;
+	char saved;
+} EDITWIN;
+
+EDITWIN *ewcreate(char *filename);
+EDITWIN *ewnew();
+EDITWIN *ewopen();
+
+bool ewsave(EDITWIN *ew);
+bool ewsaveas(EDITWIN *ew);
+bool ewsavecopy(EDITWIN *ew);
+bool ewsaveall();
+bool ewrevert(EDITWIN *ew);
+bool ewclose(EDITWIN *ew);
+bool ewcloseall();
+
+bool ewwritefile(EDITWIN *ew, char *filename);
+bool ewreadfile(EDITWIN *ew, char *filename);
+
+bool ewevent(EDITWIN *ew, EVENT *e, int *closed_return);
+void ewreplace(EDITWIN *ew, char *str);
+void ewundo(EDITWIN *ew); /* Not implemented */
+void ewcopy(EDITWIN *ew);
+void ewpaste(EDITWIN *ew);
+
+EDITWIN *ewfind(WINDOW *win);
+int ewcount();
+.ft 1
+.fi
+.SH DESCRIPTION
+.I Editwin
+is a package built on top of the
+.I textedit
+package, to ease the construction of views on text files etc.
+Many calls exist to make it extremely simple to respond to standard
+menus of
+.B File
+operations (New, Open..., Save, etc.) and
+.B Edit
+operations (Cut, Copy, Paste).
+.PP
+Below are descriptions of the individual functions.
+Note that when a reference is made to a window's contents, the entire
+contents of the edit buffer belonging to the window is meant, not just
+the part of it visible in the window.
+.IP ewcreate
+If
+.I filename
+is a nil pointer, this call creates an ``Untitled'' edit window.
+Otherwise, the specified file must exist, and an edit window showing
+its contents is created.
+In both cases, the window's `saved' flag is set initially.
+A pointer to a newly allocated EDITWIN struct is returned.
+If something went wrong (e.g., insufficient memory, or an unreadable
+file was specified), a nil pointer is returned.
+.IP ewnew
+This function can be called in response to the selection of the
+.B New
+menu item.
+It is equivalent to a call to
+.I ewcreate((char*)0).
+.IP ewopen
+Call this function for the
+.B Open...
+menu item.
+It asks the user for an existing file name (using
+.IR waskfile ),
+and then calls
+.I ewcreate
+with that file name as parameter.
+It returns nil if the dialog was cancelled or
+.I ewcreate
+returns nil.
+.IP ewsave
+Call this function for the
+.B Save
+menu item.
+If the window's contents were modified since they were last read or
+saved, the function attempts to save the window to its file.
+If the window was still ``Untitled'', the user is first asked to specify
+a file name.
+The function returns true (nonzero) if the contents were actually saved,
+or didn't need saving.
+.IP ewsaveas
+Call this function for the
+.B Save As...
+menu item.
+It asks the user for a new file name to save the window's contents, and
+if the saving succeeds, sets this to be the file name to which future
+save operations are directed.
+.IP ewsavecopy
+Call this function for the
+.B Save a Copy...
+menu item.
+Like
+.IR ewsaveas ,
+this function asks file a new file name and saves the window's contents
+to that file; but it does not change the file name used for future save
+operations.
+.IP ewsaveall
+Calls
+.I ewsave
+for all windows.
+If any call returns false (zero),
+.I ewsaveall
+skips further calls and returns false.
+.IP ewrevert
+Call this function for the
+.B Revert...
+menu item.
+It attempts to undo any changes since the window was last read or
+saved, by re-reading the corresponding file.
+If this is at all possible, the user is asked to confirm the operation
+first (since it may destroy valuable changes).
+The function returns true if the file was actually read back, or if the
+window was unchanged with respect to the file.
+.IP ewclose
+Closes the window.
+If the window was changed since it was last read or saved, the user is
+first asked whether it should be saved, and if the answer is Yes,
+.I ewsave
+is called.
+Cancelling the dialog will prevent closing the window.
+Returns true if the window was actually closed.
+.IP ewcloseall
+Calls
+.I ewclose
+for all windows.
+If any call returns false,
+.I ewcloseall
+skips further calls and returns false.
+.IP ewwritefile
+Writes the contents of the edit window to the specified file.
+Returns true if the operation succeeded.
+This does
+.I not
+set the `saved' flag for the window (because it is used internally be
+.IR ewsavecopy ).
+.IP ewreadfile
+Reads the contents of the given file into the edit window, discarding
+its previous contents.
+Returns true if the operation succeeded.
+This
+.I does
+set the `saved' flag for the window.
+.IP ewevent
+Call this function in response to
+.I any
+event returned by
+.I wgetevent.
+If the event is a non-menu event applicable to the specified window, it
+is handled and the function returns true;
+otherwise nothing is done and the function returns false.
+(Menu events cannot be handled this way because the editwin package
+doesn't create its own menus, and thus cannot know the menu IDs or the
+numbers of the menu items.)
+If the first parameter is a nil pointer, the event is checked against
+any edit window; otherwise, only events applying to the given window are
+handled.
+The third parameter must be a pointer to an integer variable, which is
+cleared normally when an event was handled, but set to true when a
+window was closed as a consequence of the event (it is unchanged when
+the event was nbot handled at all).
+In the latter case, the caller should check whether any windows are
+still open (see
+.IR ewcount ),
+and if this is not the case, it should either exit or open a new window.
+This function clears a window's `saved' flag whenever its contents are
+modified by the event's handling.
+.IP ewreplace
+Replaces the current text selection in the window by the given
+(null-terminated) string.
+This will insert text if the text selection was an insert point.
+.IP ewundo
+Reserved for future extension of the package with an Undo facility.
+.IP ewcopy
+Call this function for the
+.B Copy
+menu item.
+It retrieves the contents of the window's text selection, if non-null,
+and copies it in into the clipboard through a call to
+.I wsetclip.
+It beeps if the text selection is empty.
+(To implement the
+.B Cut
+menu item, call
+.I ewcopy
+followed by
+.IR "ewreplace(ew, ``'')" .)
+.IP ewpaste
+Call this function for the
+.B Paste
+menu item.
+It retrieves the contents of the clipboard, if non-null,
+and pastes it into the window through a call to
+.I ewreplace.
+It beeps (and does not change the window's contents) if the clipboard is
+empty.
+.IP ewfind
+Returns a pointer to the EDITWIN struct containing the given WINDOW
+pointer; returns nil if none exists.
+.IP ewcount
+Returns the number of open edit windows.
+.SH EXAMPLE
+The following program is a trivial but almost usable single-file text
+editor.
+Usage is ``program [file]''.
+.nf
+.ft C
+
+#include "stdwin.h"
+#include "editwin.h"
+
+main(argc, argv) int argc; char **argv; {
+	EDITWIN *ew;
+	winitnew(&argc, &argv);
+	if (argc <= 1) ewnew();
+	else           ewcreate(argv[1]);
+	for (;;) {
+		EVENT e;
+		int closed;
+		wgetevent(&e);
+		if (ewevent(ew, &e, &b) && closed) break;
+	}
+	wdone();
+	exit(0);
+}
+.ft 1
+.fi
+.SH HINTS
+The members of the EDITWIN data structure are explicitly intended to be
+accessible to the caller.
+Functionality which is not provided directly but which is available for
+plain windows or for textedit data structures can be implemented by
+applying it to the
+.I win
+or
+.I tp
+members.
+Note that the
+.I filename
+member, when non-nil, points to memory allocated with
+.IR malloc (3).
+.PP
+Changes to the window's contents should preferably be made with
+.I ewreplace,
+since it manages the `saved' flag.
+.PP
+To control the text attributes used in an EDITWIN window, you can set
+them globally before creating the window.
+.SH DIAGNOSTICS
+.I Ewcreate, ewnew
+and
+.I ewopen
+return nil when the user cancelled the operation or when they could not
+get all the necessary memory.
+The save, revert, close and read/write family of functions return FALSE
+if the operation was canceled by the user or if the file I/O failed.
+.I Ewevent
+returns TRUE when it has processed the event.
+.PP
+.I Ewcreate
+and
+.I ewopen
+warn the user if a file is larger than about 30K; the textedit package
+was not designed to operate on big files, and may be intolerably slow.
+.SH SEE ALSO
+STDWIN documentation
+.br
+textedit(3)
+.SH AUTHOR
+Guido van Rossum
+.SH BUGS
+.I Editwin
+inherits some bugs from the
+.I textedit
+package.
+.br
+The package doesn't detect the situation where the user opens the same
+file twice, edits both copies, and saves them, thus losing the
+changes to the copy saved first.
+.br
+If the height of the document gets over 32K scan lines, you are
+in trouble: most window systems limit coordinates to short integers.
+.br
+Missing functionality:
+a way to specify an alternate title for an untitled window;
+a way to create a non-file window, which isn't saved when closed.
+(These should be easy to add, given the simplicity of the source.)

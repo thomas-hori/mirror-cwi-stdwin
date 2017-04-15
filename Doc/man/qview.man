@@ -1,0 +1,175 @@
+.TH QVIEW 1
+.SH NAME
+qview \- printer queue viewer
+.SH SYNOPSIS
+.B qview
+[
+.B -S
+.I spooldir
+]
+[
+.BI -P printer
+]
+[
+.B \-s
+]
+[
+.B \-n
+]
+[
+.B \-l
+]
+[
+.B +\n
+.I interval
+]
+.SH DESCRIPTION
+.I Qview
+is a STDWIN-based application which continuously displays the status of
+a printer queue.
+It is intended as a replacement for
+.IR lpq (1),
+continuously sitting in a corner of your display.
+In order to reduce the required screen ``real estate'', an optional
+compact listing format is available.
+.PP
+This is a single-window program;
+to monitor several printer queues simultaneous you must run separate
+copies for each printer, or circulate through the different queues
+using the Printers menu (see below).
+.SH COMMAND LINE OPTIONS
+.IP "\-S spooldir"
+Uses
+.IR spooldir / printer
+instead of
+.RI /usr/spool/ printer
+to find the spool directory.
+.IP "\-Pprinter"
+Displays  the queue for printer
+.I printer.
+The default is taken from the shell environment variable PRINTER;
+if this isn't set the default is lp.
+.IP "-s"
+Displays a short, columnar listing.
+This only shows job number, size and owner for each job.
+.IP "-n"
+Displays a normal listing, using one line per job.
+This shows the queue ordinal, control file name, owner, size and number
+of data files per job.
+This is the default.
+.IP "-l"
+Displays a long listing, showing additional information for each data
+file.
+.IP "+interval"
+Sets the number of seconds between window updates.
+The default is 30 seconds.
+This option must be last!
+.LP
+There may be other options which are processed by the particular
+implementation of STDWIN used.
+.SH SELECTING JOBS
+A job may be selected by pointing at it with the mouse.
+The selected job is displayed highlighted;
+it is the target of certain commands (see below).
+The up and down arrow keys can also be used to select jobs.
+The selection is removed when the display is refreshed;
+to give you a chance to do something to the selected job,
+the display refresh is put off for at least 10 seconds
+when a selection has been made.
+.SH MENUS
+.I Qview
+has three menus.
+.PP
+The
+.B Command
+menu contains the following items:
+.IP "Delete job"
+Only enabled when a job has been selected (see above);
+this command deletes the job from the queue if allowed.
+.IP "Move job to queue top"
+Only enabled when a job has been selected (see above);
+this command moves the job to the top of the queue if allowed
+(you must be root for this to work).
+.IP "Restart daemon"
+Restart the printer daemon, if allowed.
+Use with caution; this can cause the current job to be killed and
+restarted.
+.IP "Refresh display"
+Updates the display with fresh information (see below).
+.IP "Set refresh interval..."
+Allows you to type the new time interval between display refreshes
+(the + option on the command line).
+.IP "Quit"
+Exits the program.
+.PP
+The
+.B Format
+menu allows the current listing format to be changed between Short,
+Normal and Long.
+The current listing format is indicated with a tick mark or an asterisk.
+.PP
+The
+.B Printers
+menu shows the different printers available in the system, with the
+printer whose queue is currently shown checked.
+Choosing an entry causes the program to switch to that printer's queue.
+.SH DISPLAY REFRESHING
+Normally the information is refreshed every
+.I interval
+seconds.
+It is also refreshed:
+when the window is resized,
+when the listing format is changed,
+when a different printer is chosen,
+when the Return key is pressed,
+or when
+.B "Refresy display"
+from the
+.B Quit
+menu is chosen.
+After such a forced refresh, the next refresh is scheduled in
+.I interval
+seconds.
+.SH DIAGNOSTICS
+Panics if it can't chdir to the spool directory or can't create
+windows or menus.
+.br
+Beeps if a command couldn't be executed.
+.SH FILES
+/usr/spool/*
+.I "spool directories"
+.br
+.SH SEE ALSO
+lpq(1), lprm(1), lpc(8)
+.br
+STDWIN documentation
+.SH AUTHOR
+Guido van Rossum
+.SH BUGS
+Because it isn't suid daemon, it can't list remote queues like lpq can
+and it can't look in the control files.
+Because it can't look in the control files it uses a heuristic to find
+out which data files belong to a control file; this heuristic may fail
+and then it will lie about some jobs.
+.br
+Instead of consulting /etc/printcap, it assumes the printer spool
+directory is
+.RI /usr/spool/ printer ,
+except when
+.I printer
+is lp, in which case it knows the spool directory is /usr/spool/lpd.
+.br
+Long format is unimplemented (shows identical sas normal format).
+.br
+The display flashes at each refresh, even if the information displayed
+isn't changed.
+.br
+Deleting takes extraordinary long because lprm seems to take forever;
+also lprm doesn't return a meaningful exit status so success or failure
+can't be reported.
+.br
+The entries in the Printers menu are hardwirde in the program, except
+that any printer specified on the command line is added to the menu if
+it is not already in it.
+.br
+I suspect that restarting a daemon frequently may cause it to hang.

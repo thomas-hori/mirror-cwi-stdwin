@@ -1,0 +1,11 @@
+Many of the applications here don't really work.
+Some once worked, others are simply unfinished.
+
+Working ones are:
+
+bed		bitmap editor (not too good)
+dpv		ditroff previewer
+klok		analog clock + alarm; root can set the time by dragging hands
+miniedit	simple file editor
+repeat		repeatedly run a command and show its output
+test		various test programs (no Make.proto's here)

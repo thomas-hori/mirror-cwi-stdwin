@@ -1,0 +1,4 @@
+When there are multiple windows with global & local menus, opening the
+menus shows the local menus of the highest window instead of those of
+the active window.  (Some menus of other windows may also be shown.)
+The menu bar is drawn correctly though.  ("menu.c")

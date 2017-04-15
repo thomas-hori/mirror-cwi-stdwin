@@ -1,0 +1,42 @@
+NOTE -- history is now maintained as rcs log messages
+
+CHANGES -- March 30, 1990
+
+-t file reads font translations from a file
+
+added CW font translation, fixed courier and special font translations
+
+changed funnytab reading policy (-f option must be obeyed if given)
+
+initially center window in document
+
+
+CHANGES -- Jan 17, 1989
+
+created r3symbol, the special character mapping for Adobe's Symbol font
+
+changed funnyproto (changed -- to -)
+
+changed Make.conf (added comments to get back to R2)
+
+adapted choose to R3:
+	changed default font
+	took out code to ignore zero-width characters
+	(all chars >= 0x80 have zero width; probably an xlib bug!)
+
+changed meaning of '-' non-menu keyboard shortcut to toggle to previous
+page (like 'rn' does); added more non-menu keyboard shortcuts (e.g., 'G'
+like in 'vi')
+
+changed main menu shortcuts to F(irst), P(rev), N(ext), L(ast)
+
+removed dummy page menu
+
+suppress second and following warning about the same missing font
+
+adapted dpvfonts.c to X11R3 font naming scheme and changed translation
+table to map to fonts provided on MIT release
+
+fixes by Robbert van Renesse:
+	- fixed circles (these were twice too big)
+	- made splines a little nicer

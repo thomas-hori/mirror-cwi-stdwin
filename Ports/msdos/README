@@ -1,0 +1,5 @@
+Sorry, there is no real STDWIN port for MS-DOS yet.  What you can is
+to port the alfa version with the help of the file "vtrm.c" in this
+directory, which is a substitute (using the MS-DOS console driver) for
+the VTRM module used by the alfa version for all its tty I/O (the UNIX
+version of vtrm.c is in ../vtrm).

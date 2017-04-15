@@ -1,0 +1,110 @@
+Building STDWIN 1.0 on the Mac
+==============================
+
+Version information
+-------------------
+
+Compiler versions:
+
+	This release works with Symantec's Think C 6.0 or 7.0
+	(upgraded from 6.0), with Metrowerks CodeWarrior 5.0, and
+	perhaps also with Apple's MPW 3.2.  It should also still work
+	with Think C 5.0.
+
+System versions:
+
+	It has been tested on System 7.1 and 7.1.1 on the 68K Mac and
+	on System 7.1.2 on the PowerMac.  It should still work on
+	System 6 if you substitute the file argcargv.c for
+	argcargv_ae.c.  (I know, this should be done dynamically using
+	Gestalt.  Unfortunately I haven't got a machine running System
+	6 around to test it...)
+
+Needed files and directories
+----------------------------
+
+Start by copying the following directories from the STDWIN
+distribution to your Mac (if you like, you can copy the whole
+directory tree):
+
+	H
+	Tools
+	Gen
+	Ports/mac
+	Ports/mac_mpw (if you use MPW)
+	Packs/textedit
+	Appls/miniedit (for testing)
+
+Project files for Think C and CodeWarrior
+-----------------------------------------
+
+Make two projects, stdwin.<pi> and textedit.<pi> (<pi> is the letter
+pi, Option-p).  (All of STDWIN together is too big for one segment,
+and the textedit module is not used by all applications.)
+
+Turn off <MacHeaders> (Think C) or any default include file
+(CodeWarrior); the sources know exactly which files to include.
+
+Other relevant options: you can choose 4-byte ints if you like (the
+applications using STDWIN must have the same setting).  Not much else
+makes any difference.
+
+In the stdwin project, add the following files:
+
+	From Ports/mac:
+		about.c
+		argcargv_ae.c (use argcargv.c instead for System 6)
+		caret.c
+		color.c
+		cursor.c
+		dialog.c
+		dprintf.c
+		draw.c
+		event.c
+		fullpath.c
+		menu.c
+		pstring.c
+		scrap.c
+		scroll.c
+		stdwin.c
+		timer.c
+	From Gen:
+		wtextbreak.c
+	From Tools:
+		strdup.c (not if you want to link with Python)
+
+In the textedit project, add these files:
+
+		editwin.c
+		textdbg.c
+		textedit.c
+		textlow.c
+		wprintf.c
+
+Makefile for MPW C
+------------------
+
+See the directory Ports/mac_mpw.  It contains an age-old Makefile.  I
+haven't actually tested this.
+
+Building
+--------
+
+Compile the sources in each project.  Don't attempt to link.
+
+(To speed up compilation under Think C, you can rename "macwin.h" to
+"macwin.c" and precompile it, placing the output in "macwin.h".  This
+is completely optional and not recommended unless you have a slow
+machine.)
+
+To test, make a project miniedit.<pi> and add all sources from
+Appls/miniedit.  Add the ANSI and MacTraps libraries and the
+stdwin.<pi> and textedit.<pi> projects you just created.  (Probably
+everything in its own segment.)  You now have a simple editor with
+regular expression search facility.  Study the source to learn more
+about using stdwin.
+
+Good luck!
+
+--Guido van Rossum, CWI, Amsterdam <mailto:Guido.van.Rossum@cwi.nl>
+<http://www.cwi.nl/cwi/people/Guido.van.Rossum.html>
