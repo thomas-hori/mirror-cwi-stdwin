@@ -232,6 +232,7 @@ _wmenusetup()
 /* Draw the menu bar.
    Called via the normal exposure event mechanism. */
 
+void
 _wdrawmbar(win)
 	WINDOW *win;
 {

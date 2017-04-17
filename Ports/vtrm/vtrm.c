@@ -41,7 +41,7 @@
 
 #define Visible
 #define Hidden static
-#define Procedure
+#define Procedure void
 
 typedef int bool;
 typedef char *string;
@@ -67,7 +67,7 @@ Hidden int setttymode();
 Hidden Procedure resetttymode();
 Hidden int start_trm();
 Hidden bool get_pos();
-Hidden int put_line();
+Hidden Procedure put_line();
 Hidden Procedure set_mode();
 Hidden Procedure get_so_mode();
 Hidden Procedure standout();
@@ -91,7 +91,7 @@ Hidden Procedure scr3up();
 Hidden Procedure lf_scroll();
 Hidden Procedure move_lines();
 Hidden Procedure trmpushback();
-Hidden Procedure subshell();
+Hidden int subshell();
 
 /* Data definitions: */
 
@@ -341,6 +341,9 @@ Hidden bool canscroll= Yes;
 /*
  * Starting, Ending and (fatal) Error.
  */
+
+Visible Procedure trmend(void);
+Visible Procedure trmsync(int, int);
 
 /* 
  * Initialization call.
@@ -1167,7 +1170,7 @@ Visible Procedure trmputdata(yfirst, ylast, indent, data, mode)
  * and
  *	d2 maybe less than 0.
  */
-Hidden int put_line(y, xskip, data, mode, len)
+Hidden Procedure put_line(y, xskip, data, mode, len)
      int y;
      int xskip;
      string data;

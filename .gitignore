@@ -4,6 +4,7 @@ Makefile
 autom4te.cache
 config.log
 config.status
+config.cache
 Appls/klok/klok
 Appls/miniedit/miniedit
 Appls/miniedit/miniedit.alfa

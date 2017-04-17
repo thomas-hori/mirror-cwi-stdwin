@@ -19,6 +19,7 @@
    Currently, the thumb is a rectangle separated by the scroll bar's
    borders by a one-pixel wide space */
 
+void
 _wdrawhbar(win)
 	WINDOW *win;
 {
@@ -37,6 +38,7 @@ _wdrawhbar(win)
 	}
 }
 
+void
 _wdrawvbar(win)
 	WINDOW *win;
 {
@@ -97,6 +99,7 @@ _wdrawvbar(win)
 		} \
 	}
 
+void
 _whithbar(bsp, ep)
 	struct button_state *bsp;
 	EVENT *ep;
@@ -105,6 +108,7 @@ _whithbar(bsp, ep)
 	HITCODE(x, width, hbar, _wdrawhbar, IMARGIN);
 }
 
+void
 _whitvbar(bsp, ep)
 	struct button_state *bsp;
 	EVENT *ep;

@@ -12,6 +12,8 @@
 
 extern void dprintf _ARGS((char *, ...));
 
+void tesetcaret(register TEXTEDIT*);
+
 /* Forward */
 static void teinvertfocus();
 static void teinvert();
@@ -579,6 +581,7 @@ teshow(tp, left, top, right, bottom)
    Also call wshow() of the focus.
    As a side effect, the optimization data is invalidated */
 
+void
 tesetcaret(tp)
 	register TEXTEDIT *tp;
 {

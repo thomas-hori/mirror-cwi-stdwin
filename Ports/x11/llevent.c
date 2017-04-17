@@ -59,6 +59,7 @@ bool _w_focused;		/* Set if between FocusIn and FocusOut */
 Time _w_lasttime = CurrentTime;	/* Last timestamp received in an event */
 WINDOW *_w_close_this;		/* Window to close (WM_DELETE_WINDOW) */
 
+void
 _w_ll_event(e)
 	XEvent *e;
 {

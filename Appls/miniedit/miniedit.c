@@ -4,6 +4,11 @@
 #include "tools.h"
 #include "editwin.h"
 
+void menusetup(void);
+void openfiles(int, char**);
+void mainloop();
+
+int
 main(argc, argv)
 	int argc;
 	char **argv;
@@ -48,6 +53,7 @@ MENU *filemenu, *editmenu, *findmenu;
 #define REPL_SAME_ITEM	4
 #define REPL_ALL_ITEM	5
 
+void
 menusetup()
 {
 	MENU *mp;
@@ -87,6 +93,7 @@ menusetup()
 	wmenuadditem(mp, "Replace All", -1);
 }
 
+void
 fixmenus(ew)
 	EDITWIN *ew;
 {
@@ -107,6 +114,7 @@ fixmenus(ew)
 	wmenuenable(editmenu, CLEAR_ITEM, focus);
 }
 
+void
 openfiles(argc, argv)
 	int argc;
 	char **argv;
@@ -125,6 +133,7 @@ openfiles(argc, argv)
 	}
 }
 
+void
 mainloop()
 {
 	for (;;) {
@@ -276,6 +285,7 @@ replace(ew, dodialog)
 	return repldialog(ew, dodialog) && replit(ew);
 }
 
+bool
 replall(ew)
 	EDITWIN *ew;
 {
