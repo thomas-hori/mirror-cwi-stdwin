@@ -1,6 +1,6 @@
 /* Determine byte order. */
 
-#include "endian.h"
+#include "stdwin.endian.h"
 
 int endian;
 

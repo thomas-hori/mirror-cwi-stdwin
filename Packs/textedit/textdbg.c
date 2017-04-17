@@ -2,10 +2,10 @@
 
 #include "text.h"
 
-#ifndef macintosh
+/*#ifndef macintosh*/
 
 /*VARARGS1*/
-dprintf(fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
+/*dprintf*/ stdwin_dprintf(fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
 	char *fmt;
 {
 	printf("\r\n");
@@ -13,7 +13,7 @@ dprintf(fmt, a1, a2, a3, a4, a5, a6, a7, a8, a9, a10)
 	printf("\r\n");
 }
 
-#endif
+/*#endif*/
 
 #ifndef NDEBUG
 

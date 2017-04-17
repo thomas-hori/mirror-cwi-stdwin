@@ -124,4 +124,6 @@ char *zrealloc();
 #define zcheckpos(pos)	/*empty*/
 #define zcheck()	/*empty*/
 
+#define dprintf stdwin_dprintf
+
 #endif /* NDEBUG */

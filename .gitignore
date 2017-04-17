@@ -1,0 +1,9 @@
+*.o
+*.a
+Makefile
+autom4te.cache
+config.log
+config.status
+Appls/klok/klok
+Appls/miniedit/miniedit
+Appls/miniedit/miniedit.alfa
